@@ -1,5 +1,11 @@
-import firebase from "firebase";
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getStorage} from "firebase/storage";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDW9RH8Le9e2Tftfrf4TYPF0u_YBD8oP0Q",
   authDomain: "netflix-a5459.firebaseapp.com",
@@ -10,6 +16,7 @@ const firebaseConfig = {
   measurementId: "G-VQW3KR37P1",
 };
 
-firebase.initializeApp(firebaseConfig);
-const storage = firebase.storage();
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
 export default storage;

@@ -1,3 +1,4 @@
+import { ref, uploadBytes } from "firebase/storage";
 import { useState } from "react";
 import storage from "../../firebase";
 import "./newProduct.css";
@@ -15,38 +16,36 @@ export default function NewProduct() {
     const value = e.target.value;
     setMovie({ ...movie, [e.target.name]: value });
   };
-
-const upload=items=>{
-  items.forEach(item=>{
-    const file=item.file.name;
-    console.log("egrf",file)
-    const uploadTask=storage.ref(`/items/${file}`.put(item))
-    uploadTask.on("state_change",snapshot=>{
-      const progress=(snapshot.byteTransferred /snapshot.totalBytes)*100
-      console.log("Upload is"+progress+" % done.");
-
-    },
-    (err)=>{console.log(err)},()=>{
-      uploadTask.snapshot.ref.getDownloadUrl().then(url=>{
-        setMovie(prev=>{return{...prev,[item.label]:url}})
-        setUploaded((prev)=>prev+1);
+  const upload = (items) => {
+    items.forEach((item) => {
+      const storageRef = ref(storage, `/items/${item.file.name}`);
+      uploadBytes(storageRef, item.file).then((snapshot) => {
+        const progress = Math.round(snapshot.byteTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is" + progress + " % done.");
+        const gsRef = ref(
+          storage,
+          `gs://netflix-a5459.appspot.com/items/${item.file.name}`
+        );
+        setMovie((prev) => {
+          return { ...prev, [item.label]: gsRef };
+        });
+        setUploaded((prev) => prev + 1);
       })
-    }
-    )
-  })
-}
+    });
+    
+  };
 
-  const handleUpload=e=>{
-    e.preventDefault()
+  const handleUpload = (e) => {
+    e.preventDefault();
     upload([
-      {file:img,label:"img"},
-      {file:imgTitle,label:"imgTitle"},
-      {file:imgSm,label:"imgSm"},
-      {file:trailer,label:"trailer"},
-      {file:video,label:"video"},
-    ])
-  }
-  console.log("ngds",movie)
+      { file: URL.createObjectURL(img), label: "img" },
+      { file: URL.createObjectURL(imgTitle), label: "imgTitle" },
+      { file: URL.createObjectURL(imgSm), label: "imgSm" },
+      { file: URL.createObjectURL(trailer), label: "trailer" },
+      { file: URL.createObjectURL(video), label: "video" },
+    ]);
+  };
+  console.log("ngds", movie);
 
   return (
     <div className="newProduct">
@@ -160,7 +159,9 @@ const upload=items=>{
         {uploaded === 5 ? (
           <button className="addProductButton">Create</button>
         ) : (
-          <button className="addProductButton" onClick={handleUpload}>Upload</button>
+          <button className="addProductButton" onClick={handleUpload}>
+            Upload
+          </button>
         )}
       </form>
     </div>
